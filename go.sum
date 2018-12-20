@@ -1,0 +1,6 @@
+github.com/JedBeom/soup v1.1.0 h1:8YOTzSfRjkUPToqpV9fX8v0EOWmk3ZaC9gMdqN3p/NE=
+github.com/JedBeom/soup v1.1.0/go.mod h1:UsZQoOhJ4of8X6ebjxSlCIEz5WaQsrCW75N9hnpvGBs=
+github.com/anaskhan96/soup v1.0.1 h1:3p9zOr7o2weHqDakRA1uR0SZNr6VhH5qPkm6p3gvS6o=
+github.com/anaskhan96/soup v1.0.1/go.mod h1:pT5vs4HXDwA5y4KQCsKvnkpQd3D+joP7IqpiGskfWW0=
+golang.org/x/net v0.0.0-20181217023233-e147a9138326 h1:iCzOf0xz39Tstp+Tu/WwyGjUXCk34QhQORRxBeXXTA4=
+golang.org/x/net v0.0.0-20181217023233-e147a9138326/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
