@@ -8,10 +8,10 @@ type Idol struct {
 
 type Role struct {
 	Name  string
-	idols []Idol
+	Idols []Idol
 }
 
 type Theme struct {
 	Name  string
-	roles []Role
+	Roles []Role
 }

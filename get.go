@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -27,19 +28,21 @@ func get() {
 	// 주제 이름들
 	themeNames := main.FindAll("h3")
 
-	var themes []Theme
+	themes := make([]Theme, 0, 3)
 
 	// 아이돌 이름 번역표
 	idolReplacer := strings.NewReplacer(idolTable...)
 	// 배역 이름 변역표
 	roleReplacer := strings.NewReplacer(roleTable...)
 
-	start := time.Now()
+	step := 0
 
+	start := time.Now()
 	// 주제 개수만큼
 	for i, themeRaw := range themesRaw {
 
 		var theme Theme
+		theme.Roles = make([]Role, 0, 5)
 
 		rolesRaw := themeRaw.FindAll("div")
 
@@ -49,16 +52,19 @@ func get() {
 		for x, roleRaw := range rolesRaw {
 
 			// Find 후에 Replace
-			theme.roles = append(theme.roles, Role{Name: roleReplacer.Replace(roleRaw.Find("h4").Text())})
+			theme.Roles = append(theme.Roles, Role{Name: roleReplacer.Replace(roleRaw.Find("h4").Text())})
 
 			rankList := roleRaw.Find("table").Find("tbody").FindAll("tr")
 
 			// 순위표 안에서 range
 			for _, line := range rankList {
+				step++
 				idolRaw := line.FindAll("td")
 				var idol Idol
 
-				idol.Rank, err = strconv.Atoi(idolRaw[0].Text())
+				rankStr := idolRaw[0].Text()
+				idol.Rank, err = strconv.Atoi(rankStr[:len(rankStr)-4])
+
 				idol.Name = idolReplacer.Replace(idolRaw[1].Text())
 				idol.VoteAmount, err = strconv.Atoi(idolRaw[2].Text())
 
@@ -66,7 +72,7 @@ func get() {
 					fmt.Println(err)
 				}
 
-				theme.roles[x].idols = append(theme.roles[x].idols, idol)
+				theme.Roles[x].Idols = append(theme.Roles[x].Idols, idol)
 
 			}
 
@@ -77,6 +83,9 @@ func get() {
 
 	fmt.Println(time.Now().Sub(start))
 
-	fmt.Println(themes[0].roles[3])
+	fmt.Println("Step:", step)
+
+	js, _ := json.MarshalIndent(&themes[0], "", "    ")
+	fmt.Println(string(js))
 
 }
