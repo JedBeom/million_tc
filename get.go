@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JedBeom/soup"
+	"github.com/anaskhan96/soup"
 )
 
 func get() {
@@ -19,8 +19,15 @@ func get() {
 		os.Exit(1)
 	}
 
+	total := append(idolTable, roleTable...)
+	totalReplacer := strings.NewReplacer(total...)
+
+	resp = totalReplacer.Replace(resp)
+
 	// 파싱
 	doc := soup.HTMLParse(resp)
+	start := time.Now()
+
 	// 메인
 	main := doc.Find("main")
 	themesRaw := main.FindAllStrict("div", "class", "row")
@@ -30,14 +37,8 @@ func get() {
 
 	themes := make([]Theme, 0, 3)
 
-	// 아이돌 이름 번역표
-	idolReplacer := strings.NewReplacer(idolTable...)
-	// 배역 이름 변역표
-	roleReplacer := strings.NewReplacer(roleTable...)
-
 	step := 0
 
-	start := time.Now()
 	// 주제 개수만큼
 	for i, themeRaw := range themesRaw {
 
@@ -46,13 +47,13 @@ func get() {
 
 		rolesRaw := themeRaw.FindAll("div")
 
-		theme.Name = roleReplacer.Replace(themeNames[i].Text())
+		theme.Name = themeNames[i].Text()
 
 		// 배역 개수만큼
 		for x, roleRaw := range rolesRaw {
 
 			// Find 후에 Replace
-			theme.Roles = append(theme.Roles, Role{Name: roleReplacer.Replace(roleRaw.Find("h4").Text())})
+			theme.Roles = append(theme.Roles, Role{Name: roleRaw.Find("h4").Text()})
 
 			rankList := roleRaw.Find("table").Find("tbody").FindAll("tr")
 
@@ -65,7 +66,7 @@ func get() {
 				rankStr := idolRaw[0].Text()
 				idol.Rank, err = strconv.Atoi(rankStr[:len(rankStr)-4])
 
-				idol.Name = idolReplacer.Replace(idolRaw[1].Text())
+				idol.Name = idolRaw[1].Text()
 				idol.VoteAmount, err = strconv.Atoi(idolRaw[2].Text())
 
 				if err != nil {
