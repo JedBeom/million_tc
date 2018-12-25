@@ -1,17 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/anaskhan96/soup"
 )
 
-func get() {
+func get() (themes []Theme) {
 	// 접속
 	resp, err := soup.Get("https://mltd.matsurihi.me/election/")
 	if err != nil {
@@ -26,7 +24,6 @@ func get() {
 
 	// 파싱
 	doc := soup.HTMLParse(resp)
-	start := time.Now()
 
 	// 메인
 	main := doc.Find("main")
@@ -34,10 +31,6 @@ func get() {
 
 	// 주제 이름들
 	themeNames := main.FindAll("h3")
-
-	themes := make([]Theme, 0, 3)
-
-	step := 0
 
 	// 주제 개수만큼
 	for i, themeRaw := range themesRaw {
@@ -59,7 +52,6 @@ func get() {
 
 			// 순위표 안에서 range
 			for _, line := range rankList {
-				step++
 				idolRaw := line.FindAll("td")
 				var idol Idol
 
@@ -82,11 +74,5 @@ func get() {
 		themes = append(themes, theme)
 	}
 
-	fmt.Println(time.Now().Sub(start))
-
-	fmt.Println("Step:", step)
-
-	js, _ := json.MarshalIndent(&themes[0], "", "    ")
-	fmt.Println(string(js))
-
+	return
 }

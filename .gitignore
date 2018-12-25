@@ -15,4 +15,5 @@ million_tc
 # .DS_Store
 .DS_Store
 
-
+# config file
+config.json
