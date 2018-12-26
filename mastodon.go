@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/McKael/madon"
@@ -56,14 +58,37 @@ func toot(content, cw string) (st *madon.Status, err error) {
 	return
 }
 
-func reply(replyTo int64, content, cw string) (st *madon.Status, err error) {
+func reply(noti *madon.Notification, content, cw string) (st *madon.Status, err error) {
+
+	current, err := mc.GetCurrentAccount()
+	if err != nil {
+		fmt.Println("Err", err)
+		return
+	}
+
+	s := noti.Status
+
+	var mentions []string
+	// Add the sender if she is not the connected user
+	if s.Account.Acct != current.Acct {
+		mentions = append(mentions, "@"+s.Account.Acct)
+	}
+	for _, m := range s.Mentions {
+		if m.Acct != current.Acct {
+			mentions = append(mentions, "@"+m.Acct)
+		}
+	}
+	mentionsStr := strings.Join(mentions, " ")
+	content = mentionsStr + content
+
 	status := madon.PostStatusParams{
 		Text:        content,
 		Visibility:  "unlisted",
 		SpoilerText: cw,
-		InReplyTo:   replyTo,
+		InReplyTo:   noti.Status.ID,
 	}
 
 	st, err = mc.PostStatus(status)
+
 	return
 }

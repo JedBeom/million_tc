@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/McKael/madon"
@@ -52,13 +53,29 @@ func Run() {
 				continue
 			}
 
-			content := bluemonday.StrictPolicy().Sanitize(noti.Status.Content)
+			if noti.Type != "mention" {
+				continue
+			}
 
-			st, err := reply(noti.Status.ID, noti.Account.DisplayName+"님의 멘션: "+content, "봇 테스트 중")
+			contentRaw := bluemonday.StrictPolicy().Sanitize(noti.Status.Content)
+
+			contentArray := strings.Split(contentRaw, " ")
+			content := " "
+			for _, value := range contentArray {
+				if len(value) == 0 {
+					continue
+				}
+
+				if strings.HasPrefix(value, "@") {
+					continue
+				}
+
+				content += value + " "
+			}
+
+			_, err = reply(&noti, content, "봇 테스트 중")
 			if err != nil {
 				fmt.Println(err)
-			} else {
-				fmt.Printf("%+v", st)
 			}
 		}
 
