@@ -74,12 +74,12 @@ func reply(noti *madon.Notification, content, cw string) (st *madon.Status, err 
 		mentions = append(mentions, "@"+s.Account.Acct)
 	}
 	for _, m := range s.Mentions {
-		if m.Acct != current.Acct {
+		if m.Acct != current.Acct && m.Acct != s.Account.Acct {
 			mentions = append(mentions, "@"+m.Acct)
 		}
 	}
 	mentionsStr := strings.Join(mentions, " ")
-	content = mentionsStr + content
+	content = mentionsStr + " " + content
 
 	status := madon.PostStatusParams{
 		Text:        content,

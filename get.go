@@ -2,19 +2,18 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/anaskhan96/soup"
 )
 
-func get() (themes []Theme) {
+func get() (themes []Theme, err error) {
 	// 접속
 	resp, err := soup.Get("https://mltd.matsurihi.me/election/")
 	if err != nil {
 		fmt.Println("Error.")
-		os.Exit(1)
+		return
 	}
 
 	total := append(idolTable, roleTable...)
@@ -57,12 +56,15 @@ func get() (themes []Theme) {
 
 				rankStr := idolRaw[0].Text()
 				idol.Rank, err = strconv.Atoi(rankStr[:len(rankStr)-4])
+				if err != nil {
+					return
+				}
 
 				idol.Name = idolRaw[1].Text()
-				idol.VoteAmount, err = strconv.Atoi(idolRaw[2].Text())
 
+				idol.VoteAmount, err = strconv.Atoi(idolRaw[2].Text())
 				if err != nil {
-					fmt.Println(err)
+					return
 				}
 
 				theme.Roles[x].Idols = append(theme.Roles[x].Idols, idol)
