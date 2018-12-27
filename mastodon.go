@@ -11,6 +11,7 @@ import (
 )
 
 type Config struct {
+	Instance     string `json:"instance"`
 	ClientKey    string `json:"client_key"`
 	ClientSecret string `json:"client_secret"`
 	AccessToken  string `json:"access_token"`
@@ -39,7 +40,7 @@ func init() {
 		TokenType:   "urn:ietf:wg:oauth:2.0:oob",
 	}
 
-	mc, err = madon.RestoreApp("MillionTC", "uri.life", config.ClientKey, config.ClientSecret, &userToken)
+	mc, err = madon.RestoreApp("MillionTC", config.Instance, config.ClientKey, config.ClientSecret, &userToken)
 
 	if err != nil {
 		panic(err)
