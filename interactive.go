@@ -6,15 +6,22 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/McKael/madon"
 	"github.com/microcosm-cc/bluemonday"
 )
 
-var helpMsg = `사용법: (테마 번호)-(배역 번호)
-ex) 외딴 섬 서스펜스 호러의 저택의 여주인 -> 1-4`
+var (
+	t *template.Template
 
-var t *template.Template
+	events   = make(chan madon.StreamEvent)
+	stopChan = make(chan bool)
+	doneChan = make(chan bool)
+
+	helpMsg = `사용법: (테마 번호)-(배역 번호)
+ex) 외딴 섬 서스펜스 호러의 저택의 여주인 -> 1-4`
+)
 
 func init() {
 	format := "{{ range . }}{{ .Rank }}등 {{ .Name }} {{ .VoteAmount }}표\n{{ end }}"
@@ -22,35 +29,7 @@ func init() {
 	t = template.Must(template.New("format").Parse(format))
 }
 
-/*
-func RunOld() {
-	themes := get()
-
-	format := "{{ range . }}{{ .Rank }}등 {{ .Name }} {{ .VoteAmount }}표\n{{ end }}"
-
-	t := template.Must(template.New("foramt").Parse(format))
-
-	var tpl bytes.Buffer
-
-	t.Execute(&tpl, themes[0].Roles[3].Idols)
-
-	st, err := toot(tpl.String(), "밀리시타")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(st)
-
-}
-*/
-
 func Run() {
-
-	var (
-		events   = make(chan madon.StreamEvent)
-		stopChan <-chan bool
-		doneChan chan bool
-	)
 
 	err := mc.StreamListener("user", "", events, stopChan, doneChan)
 	if err != nil {
@@ -115,6 +94,7 @@ Streamer:
 
 			if requestsInt[0] < 1 || requestsInt[0] > 3 || requestsInt[1] < 1 || requestsInt[1] > 5 {
 				_, err = reply(&noti, "첫번째 숫자는 1부터 3, 두번째 숫자는 1부터 5만 있어요!", "")
+				continue
 			}
 
 			themes, err := get()
@@ -134,11 +114,9 @@ Streamer:
 
 			t.Execute(&tpl, role.Idols)
 
-			roleFullName := theme.Name + "-" + role.Name
+			cwText := theme.Name + "-" + role.Name + " 역 투표 현황"
 
-			ranks := roleFullName + " 역\n" + tpl.String()
-
-			_, err = reply(&noti, ranks, roleFullName)
+			_, err = reply(&noti, tpl.String(), cwText)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -146,3 +124,33 @@ Streamer:
 
 	}
 }
+
+func restarter() {
+	for {
+		fmt.Println("Restarter Loop started")
+		_, ok := <-doneChan
+		if !ok {
+			fmt.Println("Restarting...")
+
+			stopChan = make(chan bool)
+			doneChan = make(chan bool)
+
+			err := mc.StreamListener("user", "", events, stopChan, doneChan)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+
+		time.Sleep(time.Second)
+
+	}
+}
+
+/*
+func Tester() {
+	time.Sleep(time.Second)
+	fmt.Println("Closing stopChan")
+	close(stopChan)
+}
+*/
