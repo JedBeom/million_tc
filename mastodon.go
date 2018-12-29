@@ -82,9 +82,16 @@ func reply(noti *madon.Notification, content, cw string) (st *madon.Status, err 
 	mentionsStr := strings.Join(mentions, " ")
 	content = mentionsStr + " " + content
 
+	var visibility string
+	if s.Visibility != "public" {
+		visibility = s.Visibility
+	} else {
+		visibility = "unlisted"
+	}
+
 	status := madon.PostStatusParams{
 		Text:        content,
-		Visibility:  "unlisted",
+		Visibility:  visibility,
 		SpoilerText: cw,
 		InReplyTo:   noti.Status.ID,
 	}
